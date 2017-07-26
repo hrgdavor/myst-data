@@ -2,15 +2,19 @@ package hr.hrg.myst.data;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.NoSuchElementException;
 
-public class ImmutableList<T> implements Iterable<T>{
+
+public class ImmutableList<T> implements Iterable<T>, List<T>{
 	private final T[] items;
 
 	
+	@SafeVarargs
 	public static final <T> ImmutableList<T> safe(T... in){
 		return new ImmutableList<>(true,in);
 	}
@@ -51,7 +55,8 @@ public class ImmutableList<T> implements Iterable<T>{
         return items[i];
     }
     
-    public boolean contains(T elem){
+    @Override
+    public boolean contains(Object elem){
         if(elem == null) return false;
         for(T inArr: items){
             if(inArr.equals(elem)) return true;
@@ -60,7 +65,7 @@ public class ImmutableList<T> implements Iterable<T>{
     }
     
     @SuppressWarnings("unchecked")
-    public ImmutableList<T> remove(T elem){
+    public ImmutableList<T> removeMakeNew(T elem){
         if(!contains(elem)) return this;
         T[] newArr = (T[]) Array.newInstance(items.getClass().getComponentType(), items.length-1);
         int i=0;
@@ -75,7 +80,7 @@ public class ImmutableList<T> implements Iterable<T>{
         return new ImmutableList<T>(true,newArr);
     }
         
-    public ImmutableList<T> add(T elem){
+    public ImmutableList<T> addMakeNew(T elem){
         if(elem == null) throw new IllegalArgumentException("Null value not allowd inside this list !");
         return add(elem,null);
     }
@@ -88,7 +93,7 @@ public class ImmutableList<T> implements Iterable<T>{
         return new ImmutableList<T>(true,newArr);
     }
     
-    public ImmutableList<T> sort(Comparator<T> comparator){
+    public ImmutableList<T> sortMakeNew(Comparator<T> comparator){
         T[] newArr = Arrays.copyOf(items, items.length);
         Arrays.sort(newArr, comparator);
         return new ImmutableList<T>(true,newArr);
@@ -133,6 +138,121 @@ public class ImmutableList<T> implements Iterable<T>{
 				throw new UnsupportedOperationException();
 			}
 		};
+	}
+
+	@Override
+	public Object[] toArray() {
+		Object[] ret = new Object[items.length];
+		System.arraycopy(items, 0, ret, 0, items.length);
+		return ret;
+	}
+
+	@SuppressWarnings({ "hiding", "unchecked" })
+	@Override
+	public <T> T[] toArray(T[] a) {
+		if(a.length < items.length){
+			a = (T[]) Array.newInstance(a.getClass().getComponentType(), items.length);
+		}
+		System.arraycopy(items, 0, a, 0, items.length);			
+		return a;
+	}
+
+	@Override
+	public boolean add(T e) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public boolean remove(Object o) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public boolean containsAll(Collection<?> c) {
+		for (Object object : c) {
+			if(!this.contains(object)) return false;
+		}
+		return true;
+	}
+
+	@Override
+	public boolean addAll(Collection<? extends T> c) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public boolean addAll(int index, Collection<? extends T> c) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public boolean removeAll(Collection<?> c) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public boolean retainAll(Collection<?> c) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void clear() {
+		throw new UnsupportedOperationException();		
+	}
+
+	@Override
+	public T set(int index, T element) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void add(int index, T element) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public T remove(int index) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public int indexOf(Object elem) {
+        if(elem == null) return -1;
+        for(int i=0; i<items.length; i++){
+            if(items[i] != null && items[i].equals(elem)) return i;
+        }
+        return -1;
+	}
+
+	@Override
+	public int lastIndexOf(Object elem) {
+        if(elem == null) return -1;
+        for(int i=items.length-1; i>0; i--){
+            if(items[i] != null && items[i].equals(elem)) return i;
+        }
+        return -1;
+	}
+
+	@Override
+	public ListIterator<T> listIterator() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public ListIterator<T> listIterator(int index) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public List<T> subList(int fromIndex, int toIndex) {
+		if(fromIndex >= items.length || toIndex > items.length){
+			throw new ArrayIndexOutOfBoundsException(items.length);
+		}
+		@SuppressWarnings("unchecked")
+		T[] newArr = (T[]) Array.newInstance(items.getClass().getComponentType(), toIndex-fromIndex);
+		System.arraycopy(items, 0, newArr, fromIndex, newArr.length);			
+		ImmutableList<T> ret = new ImmutableList<>(true, newArr); 
+		return ret;
 	}
 	
 }
