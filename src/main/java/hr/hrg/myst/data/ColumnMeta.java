@@ -1,5 +1,7 @@
 package hr.hrg.myst.data;
 
+import java.util.List;
+
 public interface ColumnMeta {
 	/** 
 	 * @return column name in database
@@ -22,4 +24,8 @@ public interface ColumnMeta {
 	public boolean isPrimitive();
 	
 	public int ordinal();
+
+	boolean isGeneric();
+
+	List<Class<?>> getTypeParams();
 }
